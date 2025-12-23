@@ -1,0 +1,192 @@
+/* Dark theme (default) */
+.admin-app {
+  min-height: 100vh;
+  background-color: #0f0f0f;
+  color: white;
+  /* Keep the top-level app as a normal block. The .admin-layout handles the horizontal layout. */
+  display: block;
+}
+
+.admin-app .sidebar {
+  background-color: #111827;
+  color: white;
+}
+
+.admin-app .header {
+  background-color: #111827;
+  color: white;
+}
+
+.admin-app .stat-card {
+  background-color: #1a202c;
+  color: white;
+}
+
+.admin-app .dashboard {
+  background-color: #0f0f0f;
+  color: white;
+}
+
+.admin-app table {
+  color: white;
+}
+
+.admin-app table th {
+  color: #d1d5db;
+}
+
+.admin-app table td {
+  color: #d1d5db;
+}
+
+.admin-app input, .admin-app select {
+  background-color: #374151;
+  color: white;
+  border-color: #4b5563;
+}
+
+.admin-app input::placeholder {
+  color: #9ca3af;
+}
+
+/* Light theme */
+.admin-app:has(.theme-light) {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.admin-app:has(.theme-light) .sidebar {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+.admin-app:has(.theme-light) .header {
+  background-color: #ffffff;
+  color: #1f2937;
+}
+
+.admin-app:has(.theme-light) .stat-card {
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+.admin-app:has(.theme-light) .dashboard {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
+
+.admin-app:has(.theme-light) table {
+  color: #1f2937;
+}
+
+.admin-app:has(.theme-light) table th {
+  color: #374151;
+}
+
+.admin-app:has(.theme-light) table td {
+  color: #374151;
+}
+
+.admin-app:has(.theme-light) input, .admin-app:has(.theme-light) select {
+  background-color: #f9fafb;
+  color: #1f2937;
+  border-color: #d1d5db;
+}
+
+.admin-app:has(.theme-light) input::placeholder {
+  color: #9ca3af;
+}
+
+.admin-layout {
+  display: block; /* layout controlled by fixed sidebar + main-content margin */
+}
+
+.sidebar {
+  width: 16rem; /* equivalent to w-64 */
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  overflow-y: auto;
+  z-index: 40;
+}
+
+.main-content {
+  margin-left: 16rem; /* space for fixed sidebar */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.admin-content {
+  flex: 1;
+  padding: 1.5rem; /* consistent content padding */
+  overflow-y: auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1f2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #4b5563;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Light theme scrollbar */
+.admin-app:has(.theme-light) ::-webkit-scrollbar-track {
+  background: #e5e7eb;
+}
+
+.admin-app:has(.theme-light) ::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+}
+
+.admin-app:has(.theme-light) ::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid #374151;
+  }
+
+  .main-content {
+    margin-left: 0;
+  }
+
+  .admin-layout {
+    display: block;
+  }
+}
+
+/* Additional theme classes for direct application */
+.theme-dark {
+  background-color: #0f0f0f;
+  color: white;
+}
+
+.theme-light {
+  background-color: #f9fafb;
+  color: #1f2937;
+}
