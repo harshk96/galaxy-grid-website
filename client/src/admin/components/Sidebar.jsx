@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useTheme } from '../context/ThemeContext';
 
 const Sidebar = ({ onLogout }) => {
   const location = useLocation();
@@ -10,52 +11,54 @@ const Sidebar = ({ onLogout }) => {
     { path: '/users', label: 'Admin Users', icon: 'fas fa-users' }
   ];
 
+  const { isDark, toggleTheme } = useTheme();
+
   return (
-    <div className="sidebar w-64 bg-gray-900 border-r border-gray-800 flex flex-col">
-      <div className="p-4 flex-shrink-0">
-        <div className="text-2xl font-bold bg-gradient-to-r from-[#ec2626] to-[#f9ab1c] bg-clip-text text-transparent">
+    <div className="sidebar flex flex-col h-full w-64">
+      {/* Brand Header */}
+      <div className="p-6 flex-shrink-0">
+        <h1 className="text-2xl font-bold bg-gradient-to-r from-[#ec2626] to-[#f9ab1c] bg-clip-text text-transparent tracking-tight">
           GALAXY GRID
-        </div>
-        <p className="text-gray-400 text-sm">Admin Panel</p>
+        </h1>
+        <p className="muted small uppercase tracking-widest mt-1">Admin Panel</p>
       </div>
 
-      <nav className="flex-1 p-4">
-        <div className="space-y-1">
-          {navItems.map((item, index) => (
-            <Link
-              key={index}
-              to={`/admin${item.path}`}
-              className={`nav-link ${
-                location.pathname === `/admin${item.path}` || (item.path === '/dashboard' && location.pathname === '/admin')
-                  ? 'bg-gray-800 text-white'
-                  : 'text-gray-300 hover:bg-gray-800 hover:text-white'
-              } block px-4 py-2 rounded-md transition-colors`}
-            >
-              <i className={`${item.icon} mr-3`}></i>
-              {item.label}
-            </Link>
-          ))}
-        </div>
+      {/* Navigation */}
+      <nav className="flex-1 px-4 py-2 overflow-y-auto">
+        <ul className="space-y-1">
+          {navItems.map((item, index) => {
+            const to = `/admin${item.path}`;
+            const isActive = location.pathname === to || (item.path === '/dashboard' && (location.pathname === '/admin' || location.pathname === '/admin/' || location.pathname === '/admin/dashboard'));
+
+            return (
+              <li key={index}>
+                <Link
+                  to={to}
+                  className={`nav-link flex items-center px-4 py-3 rounded-lg transition-all duration-200 ${isActive ? 'active' : ''}`}
+                >
+                  <i className={`${item.icon} w-6 transition-transform group-hover:scale-300`}></i>
+                  <span className="font-medium">{item.label}</span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
-      
-      <div className="p-4 flex-shrink-0 space-y-4">
-        <div className="p-3 bg-gray-800 rounded-lg">
-          <p className="text-gray-400 text-xs">Server Status</p>
-          <div className="flex items-center mt-1">
-            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-            <span className="text-green-500 text-sm">Operational</span>
-          </div>
-        </div>
-        
+
+      {/* Footer Section */}
+      <div className="p-4 flex-shrink-0 border-t">
+
+
         {/* Logout Button */}
         <button
           onClick={onLogout}
-          className="w-full py-2 px-4 bg-gray-800 text-red-400 rounded-md hover:bg-gray-700 transition-colors flex items-center justify-center"
+          className="btn-ghost w-full flex items-center px-4 py-3 rounded-lg"
         >
-          <i className="fas fa-sign-out-alt mr-3"></i>
-          Logout
+          <i className="fas fa-sign-out-alt w-6 mr-3"></i>
+          <span className="font-medium">Logout</span>
         </button>
       </div>
+
     </div>
   );
 };

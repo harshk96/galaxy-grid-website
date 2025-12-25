@@ -28,6 +28,10 @@ const userSchema = new mongoose.Schema({
   isActive: {
     type: Boolean,
     default: true
+  },
+  deletedAt: {
+    type: Date,
+    default: null
   }
 }, {
   timestamps: true
@@ -54,6 +58,26 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
     console.error('Password comparison error:', error.message);
     throw error;
   }
+};
+
+// Add static method for soft delete
+userSchema.statics.softDelete = async function(id) {
+  return await this.findByIdAndUpdate(id, { deletedAt: new Date() });
+};
+
+// Add static method to find non-deleted users
+userSchema.statics.findNonDeleted = function(filter = {}) {
+  return this.find({ ...filter, deletedAt: null });
+};
+
+// Add static method to find one non-deleted user
+userSchema.statics.findOneNonDeleted = function(filter = {}) {
+  return this.findOne({ ...filter, deletedAt: null });
+};
+
+// Update the countDocuments to exclude deleted users
+userSchema.statics.countNonDeleted = function(filter = {}) {
+  return this.countDocuments({ ...filter, deletedAt: null });
 };
 
 module.exports = mongoose.model('User', userSchema);

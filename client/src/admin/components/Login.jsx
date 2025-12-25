@@ -3,34 +3,23 @@ import React, { useState } from 'react';
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 const Login = ({ onLogin }) => {
-  const [formData, setFormData] = useState({
-    email: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
 
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+    setError('');
     try {
       const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: formData.email, password: formData.password }),
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         localStorage.setItem('adminToken', data.token);
@@ -46,65 +35,73 @@ const Login = ({ onLogin }) => {
   };
 
   return (
-    <div className="login-container min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
-      <div className="login-card w-full max-w-md p-8 rounded-2xl bg-gray-800 border border-gray-700 shadow-2xl">
-        <div className="text-center mb-8">
-          <div className="text-3xl font-bold bg-gradient-to-r from-[#ec2626] to-[#f9ab1c] bg-clip-text text-transparent mb-2">
-            GALAXY GRID
-          </div>
-          <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
-          <p className="text-gray-400 mt-2">Sign in to your account</p>
-        </div>
+    <div className="login-container min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-8">
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-900/30 border border-red-700 rounded-lg text-red-300">
-            {error}
-          </div>
-        )}
+      <div className="login-card w-full max-w-md">
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-              Email
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec2626] focus:border-transparent transition-all"
-              placeholder="admin@galaxygrid.com"
-              required
-            />
-          </div>
+        <div className="p-6 sm:p-10">
+          {/* Header */}
+          <header className="text-center mb-8">
+            <div className="text-3xl sm:text-4xl font-extrabold tracking-tighter
+                            bg-gradient-to-r from-[#ec2626] to-[#f9ab1c] bg-clip-text text-transparent mb-2">
+              GALAXY GRID
+            </div>
+            <h1 className="text-xl font-bold">Admin Portal</h1>
+            <p className="muted mt-1">Sign in to your account</p>
+          </header>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ec2626] focus:border-transparent transition-all"
-              placeholder="••••••••"
-              required
-            />
-          </div>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-3 login-error text-center">{error}</div>
+          )}
 
-          <button
-            type="submit"
-            className="w-full bg-gradient-to-r from-[#ec2626] to-[#f9ab1c] text-white py-3 px-4 rounded-lg font-semibold hover:opacity-90 transition-opacity shadow-lg"
-          >
-            Sign In
-          </button>
-        </form>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-slate-300">
+                Email Address
+              </label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                autoComplete="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="admin@galaxygrid.com"
+                required
+              />
+            </div>
 
-        <div className="mt-6 text-center text-sm text-gray-400">
-          <p>Default credentials: admin@galaxygrid.com / admin123</p>
+            <div className="space-y-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-slate-300">
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                autoComplete="current-password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                required
+              />
+            </div>
+
+            <button type="submit" className="btn w-full mt-2">Sign In</button>
+          </form>
+
+          {/* Demo Box */}
+          <footer className="mt-8 pt-6 border-t">
+            <div className="p-4 rounded-xl login-demo text-center">
+              <p className="text-[10px] sm:text-xs uppercase tracking-widest mb-2 font-semibold muted">Demo Access</p>
+              <div className="space-y-1">
+                <p className="text-xs sm:text-sm font-mono muted break-all">admin@galaxygrid.com</p>
+                <p className="text-xs sm:text-sm font-mono muted">admin123</p>
+              </div>
+            </div>
+          </footer>
         </div>
       </div>
     </div>

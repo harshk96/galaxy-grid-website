@@ -14,13 +14,13 @@ router.get('/dashboard', auth, async (req, res) => {
       return res.status(403).json({ msg: 'Access denied' });
     }
 
-    // Get counts for dashboard
-    const totalContacts = await Contact.countDocuments();
-    const newContacts = await Contact.countDocuments({ status: 'new' })     ;
-    const inProgressContacts = await Contact.countDocuments({ status: 'in-progress' });
-    const resolvedContacts = await Contact.countDocuments({ status: 'resolved' });
+    // Get counts for dashboard (excluding soft-deleted items)
+    const totalContacts = await Contact.countNonDeleted();
+    const newContacts = await Contact.countNonDeleted({ status: 'new' });
+    const inProgressContacts = await Contact.countNonDeleted({ status: 'in-progress' });
+    const resolvedContacts = await Contact.countNonDeleted({ status: 'resolved' });
     
-    const totalAdmins = await User.countDocuments({ role: 'admin' });
+    const totalAdmins = await User.countNonDeleted({ role: 'admin' });
 
     res.json({
       totalContacts,
@@ -63,8 +63,8 @@ router.get('/contacts', auth, async (req, res) => {
       ];
     }
 
-    const total = await Contact.countDocuments(filter);
-    const contacts = await Contact.find(filter)
+    const total = await Contact.countNonDeleted(filter);
+    const contacts = await Contact.findNonDeleted(filter)
       .sort({ createdAt: -1 })
       .limit(limit * 1)
       .skip((page - 1) * limit);
@@ -93,8 +93,8 @@ router.put('/contacts/:id/status', auth, async (req, res) => {
 
     const { status } = req.body;
 
-    const contact = await Contact.findByIdAndUpdate(
-      req.params.id,
+    const contact = await Contact.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null },
       { status },
       { new: true }
     );
@@ -122,8 +122,8 @@ router.put('/contacts/:id/priority', auth, async (req, res) => {
 
     const { priority } = req.body;
 
-    const contact = await Contact.findByIdAndUpdate(
-      req.params.id,
+    const contact = await Contact.findOneAndUpdate(
+      { _id: req.params.id, deletedAt: null },
       { priority },
       { new: true }
     );
@@ -149,7 +149,7 @@ router.get('/users', auth, async (req, res) => {
       return res.status(403).json({ msg: 'Access denied' });
     }
 
-    const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+    const users = await User.findNonDeleted({}).select('-password').sort({ createdAt: -1 });
     res.json(users);
   } catch (error) {
     console.error(error.message);
@@ -169,10 +169,15 @@ router.post('/users', auth, async (req, res) => {
 
     const { username, email, password, role } = req.body;
 
-    // Check if user already exists
-    let user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({ msg: 'User already exists' });
+    // Check if user already exists (by email or username)
+    let existingUser = await User.findOneNonDeleted({ email });
+    if (existingUser) {
+      return res.status(400).json({ msg: 'A user with this email already exists' });
+    }
+    
+    existingUser = await User.findOneNonDeleted({ username });
+    if (existingUser) {
+      return res.status(400).json({ msg: 'A user with this username already exists' });
     }
 
     // Create new user
@@ -210,13 +215,44 @@ router.delete('/users/:id', auth, async (req, res) => {
       return res.status(403).json({ msg: 'Access denied' });
     }
 
-    const user = await User.findByIdAndDelete(req.params.id);
-
+    // Check if this is the last admin user
+    const adminCount = await User.countNonDeleted({ role: 'admin' });
+    if (adminCount <= 1) {
+      return res.status(400).json({ msg: 'Cannot delete the last admin user' });
+    }
+    
+    // Perform soft delete
+    const user = await User.softDelete(req.params.id);
+    
     if (!user) {
       return res.status(404).json({ msg: 'User not found' });
     }
+    
+    res.json({ msg: 'User soft deleted successfully' });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error');
+  }
+});
 
-    res.json({ msg: 'User removed' });
+// @route   DELETE api/admin/contacts/:id
+// @desc    Soft delete a contact
+// @access  Private
+router.delete('/contacts/:id', auth, async (req, res) => {
+  try {
+    // Only allow admin users
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ msg: 'Access denied' });
+    }
+
+    // Perform soft delete
+    const contact = await Contact.softDelete(req.params.id);
+    
+    if (!contact) {
+      return res.status(404).json({ msg: 'Contact not found' });
+    }
+    
+    res.json({ msg: 'Contact soft deleted successfully' });
   } catch (error) {
     console.error(error.message);
     res.status(500).send('Server error');

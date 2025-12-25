@@ -12,6 +12,7 @@ import Header from '../components/Header';
 const AdminLayout = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const { isDark } = useTheme();
@@ -24,63 +25,64 @@ const AdminLayout = () => {
       // In a real app, you'd verify the token and get user data
       setUser({ username: 'admin', role: 'admin' });
     }
+    setAuthChecked(true);
   }, []);
 
   // Handle redirect after authentication check
   useEffect(() => {
+    // Wait until we've checked localStorage for a token before redirecting
+    if (!authChecked) return;
+
     if (!isAuthenticated && !location.pathname.includes('/admin/login')) {
-      navigate('/admin/login');
+      navigate('/admin/login', { replace: true });
     } else if (isAuthenticated && location.pathname === '/admin/login') {
-      navigate('/admin/dashboard');
+      navigate('/admin/dashboard', { replace: true });
     }
-  }, [isAuthenticated, location.pathname, navigate]);
+  }, [isAuthenticated, location.pathname, navigate, authChecked]);
 
   const handleLogin = (userData) => {
     setIsAuthenticated(true);
     setUser(userData);
     // The token should already be in localStorage from the Login component
-    navigate('/admin/dashboard');
+    navigate('/admin/dashboard', { replace: true });
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
     setUser(null);
     localStorage.removeItem('adminToken');
-    navigate('/admin/login');
+    navigate('/admin/login', { replace: true });
   };
 
   // If not authenticated and trying to access non-login page, show nothing until redirect
-  if (!isAuthenticated && !location.pathname.includes('/admin/login')) {
-    return null;
-  }
-
-  // If authenticated and on login page, redirect to dashboard
-  if (isAuthenticated && location.pathname === '/admin/login') {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-
-  // Show login form if not authenticated
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
-
-  // Show admin layout for authenticated users
+  // Normalize: always render the admin-app root so CSS/theme variables apply
   return (
     <div className={`admin-app ${isDark ? 'theme-dark' : 'theme-light'}`}>
       <div className="admin-layout">
-        <Sidebar onLogout={handleLogout} />
-        <div className="main-content">
-          <Header user={user} onLogout={handleLogout} />
-          <div className="admin-content">
-            <Routes>
-              <Route path="dashboard" element={<Dashboard />} />
-              <Route path="contacts" element={<ContactForms />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route index element={<Navigate to="dashboard" replace />} />
-              <Route path="*" element={<Navigate to="dashboard" replace />} />
-            </Routes>
+        {/* If not authenticated, show login centered inside admin layout */}
+        {!isAuthenticated ? (
+          <div className="main-content fullwidth">
+            <div className="admin-content flex items-center justify-center min-h-screen">
+              <Login onLogin={handleLogin} />
+            </div>
           </div>
-        </div>
+        ) : (
+          <>
+            <Sidebar onLogout={handleLogout} />
+            <div className="main-content">
+              <Header user={user} onLogout={handleLogout} />
+              <div className="admin-content">
+                <Routes>
+                  <Route path="dashboard" element={<Dashboard />} />
+                  <Route path="contacts" element={<ContactForms />} />
+                  <Route path="users" element={<AdminUsers />} />
+                  <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                  <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+                </Routes>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
