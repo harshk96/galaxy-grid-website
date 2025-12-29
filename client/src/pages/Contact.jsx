@@ -66,9 +66,21 @@ const Contact = ({ isDark }) => {
   const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
   const contactMethods = [
-    { title: "Email", icon: "󰇮", value: "info@galaxygrid.com", color: "#ec2626" },
-    { title: "Phone", icon: "󰏲", value: "+1 (555) 123-4567", color: "#f9ab1c" },
-    { title: "Office", icon: "󰋜", value: "Silicon Valley, CA", color: "#ec2626" }
+    { title: "Email", icon: "󰇮", value: "akshay.hirpara90@gmail.com", color: "#ec2626" },
+    { title: "Phone", icon: "󰏲", value: "+91 82008 54316", color: "#f9ab1c" },
+    { 
+      title: "Office", 
+      icon: "󰋜", 
+      value: [
+        "210-A, Block E,",
+        "Ganesh Glory 11,",
+        "Near BSNL Office,",
+        "SG Highway,",
+        "Jagatpur, Ahmedabad,",
+        "Gujarat, India"
+      ],
+      color: "#ec2626" 
+    }
   ];
 
   const handleInputChange = (e) => {
@@ -167,16 +179,24 @@ const Contact = ({ isDark }) => {
                 <motion.div 
                   key={i}
                   whileHover={{ x: 10 }}
-                  className={`info-item p-6 rounded-3xl border flex items-center gap-6 transition-colors ${
+                  className={`info-item p-6 rounded-3xl border flex items-start gap-6 transition-colors ${
                     isDark ? 'bg-zinc-900/40 border-zinc-800 hover:border-zinc-600' : 'bg-zinc-50 border-zinc-200 hover:border-zinc-400'
                   }`}
                 >
                   <div className="w-12 h-12 rounded-full flex items-center justify-center bg-[#ec2626] text-white font-bold shadow-[0_0_20px_rgba(236,38,38,0.3)]">
                     {method.title[0]}
                   </div>
-                  <div>
+                  <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-black uppercase tracking-widest opacity-50">{method.title}</p>
-                    <p className="text-xl font-bold">{method.value}</p>
+                    {Array.isArray(method.value) ? (
+                      <p className="text-xl font-bold break-words">
+                        {method.value.map((line, idx) => (
+                          <span key={idx} className="block">{line}</span>
+                        ))}
+                      </p>
+                    ) : (
+                      <p className="text-xl font-bold break-words">{method.value}</p>
+                    )}
                   </div>
                 </motion.div>
               ))}

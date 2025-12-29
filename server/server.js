@@ -31,18 +31,20 @@ app.use('/api/contacts', contactRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 
-// Serve static files
-app.use(express.static(path.join(__dirname, '../client')));
+// Serve static files in production only
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../client')));
 
-// Handle fallback for client-side routing
-app.get('*', (req, res) => {
-  // Don't interfere with API routes
-  if (req.originalUrl.startsWith('/api/')) {
-    res.status(404).json({ message: 'API endpoint not found' });
-    return;
-  }
-  res.sendFile(path.join(__dirname, '../client/index.html'));
-});
+  // Handle fallback for client-side routing
+  app.get('*', (req, res) => {
+    // Don't interfere with API routes
+    if (req.originalUrl.startsWith('/api/')) {
+      res.status(404).json({ message: 'API endpoint not found' });
+      return;
+    }
+    res.sendFile(path.join(__dirname, '../client/index.html'));
+  });
+}
 
 // Basic route
 app.get('/', (req, res) => {
